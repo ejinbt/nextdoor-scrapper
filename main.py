@@ -31,7 +31,7 @@ email = credentials[0]
 password = credentials[1]
 
 ## comment the below line to see the automation running on browser 
-chrome_options.add_argument("--headless=new")
+#chrome_options.add_argument("--headless=new")
 driver = webdriver.Chrome(service=webdriver.chrome.service.Service(executable_path="chromedriver.exe"),options=chrome_options)
 driver.maximize_window()
 def get_profiles():
@@ -85,18 +85,19 @@ def profile(profile_url):
 def get_neighbourhood_details():
     results = []
     try:
-        neighbourhood = driver.find_element(By.CLASS_NAME,"blocks-11jkfwa").text
+        neighbourhood = driver.find_element(By.CLASS_NAME,"blocks-11jkfwa").text         
+        results.append(neighbourhood) 
+        neighbourhood_profile_stats = driver.find_element(By.CLASS_NAME,"neighborhoodProfileStats")
+        children = neighbourhood_profile_stats.find_elements(By.XPATH,"*")
+        for child in children:
+            el = child.find_element(By.CSS_SELECTOR,".blocks-eftpa8 > span")
+            results.append(el.text) 
     except selenium.common.exceptions.NoSuchElementException as error:
         print("ERROR OCCURED WHILE GETTING DETAILS OF THIS ACCOUNT",driver.current_url)
         print("PLEASE REMOVE IT AND RUN AGAIN")
-        exit()
-    results.append(neighbourhood) 
-    neighbourhood_profile_stats = driver.find_element(By.CLASS_NAME,"neighborhoodProfileStats")
-    children = neighbourhood_profile_stats.find_elements(By.XPATH,"*")
-    for child in children:
-        el = child.find_element(By.CSS_SELECTOR,".blocks-eftpa8 > span")
-        results.append(el.text) 
+        result = []
     return results
+
 
 def main():
     account_infos = []
@@ -108,11 +109,15 @@ def main():
     for url in profiles:
         profile_name = profile(profile_url=url)
         time.sleep(5)
-        results = get_neighbourhood_details()
-        account_infos.append(AccountInfo(name=profile_name,neighbourhood=results[0],neighbours=results[1],posts_this_week=results[2])) 
+        results= get_neighbourhood_details()
+        if len(results) > 1:
+            account_infos.append(AccountInfo(name=profile_name,neighbourhood=results[0],neighbours=results[1],posts_this_week=results[2])) 
+        else:
+            account_infos.append(AccountInfo(name=profile_name,neighbourhood="FAILED TO RETRIEVE",neighbours="FALIED TO RETRIEVE",posts_this_week="FAILED TO RETRIEVE"))
         time.sleep(2) 
     driver.quit()
     write_output(account_infos)
+    print("output.csv has been generated")
 
 
 if __name__ == "__main__":
