@@ -1,3 +1,4 @@
+import selenium
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service 
 from webdriver_manager.chrome import ChromeDriverManager
@@ -7,7 +8,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
 from dataclasses import dataclass
 import time
-import csv
+from csv import DictWriter
 import click
 
 @dataclass
@@ -17,8 +18,17 @@ class AccountInfo:
     neighbours:str
     posts_this_week:str
 chrome_options=Options()
-email = str(input("Please type your account email : "))
-password = str(input("Password: "))
+
+def main_account():
+    credentials = []
+    with open("credentials.txt","r") as f:
+        for i in f.readlines():
+           credentials.append(i) 
+    return credentials
+
+credentials = main_account()
+email = credentials[0]
+password = credentials[1]
 
 ## comment the below line to see the automation running on browser 
 chrome_options.add_argument("--headless=new")
@@ -33,10 +43,14 @@ def get_profiles():
     return profiles
 
 def write_output(account_infos):
-    with open("output.csv","w+",newline='') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+    field_names=["NAME","NEIGHBOURHOOD","NO OF NEIGHBOURS","POSTS THIS WEEK"]
+    
+    with open("output.csv","a") as csvfile: 
+        dictwriter_object=DictWriter(csvfile,fieldnames=field_names)    
         for i in account_infos:
-            spamwriter.writerow([i.name,i.neighbourhood,i.neighbours,i.posts_this_week])
+            row = {'NAME':i.name,'NEIGHBOURHOOD':i.neighbourhood,"NO OF NEIGHBOURS":i.neighbours,"POSTS THIS WEEK":i.posts_this_week}
+            dictwriter_object.writerow(row)
+        csvfile.close()
 
 def login(email,password):
     driver.get("https://nextdoor.com/login/?ucl=1")
@@ -70,7 +84,12 @@ def profile(profile_url):
 
 def get_neighbourhood_details():
     results = []
-    neighbourhood = driver.find_element(By.CLASS_NAME,"blocks-11jkfwa").text
+    try:
+        neighbourhood = driver.find_element(By.CLASS_NAME,"blocks-11jkfwa").text
+    except selenium.common.exceptions.NoSuchElementException as error:
+        print("ERROR OCCURED WHILE GETTING DETAILS OF THIS ACCOUNT",driver.current_url)
+        print("PLEASE REMOVE IT AND RUN AGAIN")
+        exit()
     results.append(neighbourhood) 
     neighbourhood_profile_stats = driver.find_element(By.CLASS_NAME,"neighborhoodProfileStats")
     children = neighbourhood_profile_stats.find_elements(By.XPATH,"*")
