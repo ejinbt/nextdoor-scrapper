@@ -1,0 +1,6 @@
++ it does not saves after each account - [x]
++ close profile after scraped
++ pause for 10 min after 20 scraps
++ cell one should contain profile link
++ scrape full name
++ 
