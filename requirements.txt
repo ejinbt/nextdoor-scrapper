@@ -1,2 +1,4 @@
+Requests==2.31.0
 selenium==4.16.0
+selenium_wire==5.1.0
 webdriver_manager==4.0.1
