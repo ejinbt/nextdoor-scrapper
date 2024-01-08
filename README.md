@@ -30,8 +30,8 @@
 + after login successful , scrapper is made to be ignore errors if it failed to scrape some account and continue scraping other accounts, so you can let the scraper do its work (accounts that failed to scrape will be shown in cmd and NULL value will be set for those accounts in csv file)
 + also list of failed accounts will be outputed in failed_accounts.txt file . so you can rerun scrapper with just those accounts (make sure to copy it contents to profiles.txt)
 + if profiles.txt contains links that are not profile , program will fail
-+ nextdoor has tight protection against scrapper , so it might restrict the bot if you scrape in bulk in small period of time ( go to main function and read the commented line)
-+ scrapper will be paused for 1 min after 20 accounts , you can change the sleep time in code
++ nextdoor has tight protection against scrapper , so it might restrict the bot if you scrape in bulk in small period of time 
++ scrapper will be paused for 1 min after 20 accounts , you can change the sleep time in code ( go to main function and read the commented line)
 
 
 
